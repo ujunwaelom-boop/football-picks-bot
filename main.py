@@ -102,7 +102,11 @@ async def run() -> None:
             await app.initialize()
             break
         except Exception as e:  # network blips (TimedOut/NetworkError) on cold start
-            wait = min(60, 5 * attempt)
+            wait = min(120, 5 * attempt)
+            retry_after = getattr(e, "retry_after", 0)
+            if hasattr(retry_after, "total_seconds"):
+                retry_after = retry_after.total_seconds()
+            wait = max(wait, int(retry_after) + 5)
             detail = str(e).replace(config.TELEGRAM_BOT_TOKEN, "[REDACTED]")
             log.warning("Telegram init failed (attempt %s): %s: %s; retrying in %ss", attempt, type(e).__name__, detail, wait)
             await asyncio.sleep(wait)
