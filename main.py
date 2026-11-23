@@ -97,21 +97,38 @@ async def run() -> None:
         await runner.setup()
         await web.TCPSite(runner, "0.0.0.0", port).start()
         log.info("HTTP server on :%s (/health, /app, /api%s)", port, ", " + WEBHOOK_PATH if webhook else "")
-    for attempt in range(1, 9):
+    
+            attempt = 0
+    while True:
+        attempt += 1
         try:
             await app.initialize()
             break
-        except Exception as e:  # network blips (TimedOut/NetworkError) on cold start
-            wait = min(120, 5 * attempt)
+        except Exception as e:
+            wait = min(300, 15 * attempt)
             retry_after = getattr(e, "retry_after", 0)
             if hasattr(retry_after, "total_seconds"):
                 retry_after = retry_after.total_seconds()
             wait = max(wait, int(retry_after) + 5)
             detail = str(e).replace(config.TELEGRAM_BOT_TOKEN, "[REDACTED]")
-            log.warning("Telegram init failed (attempt %s): %s: %s; retrying in %ss", attempt, type(e).__name__, detail, wait)
+            log.warning(
+                "Telegram init failed (attempt %s): %s: %s; retrying in %ss",
+                attempt, type(e).__name__, detail, wait
+            )
             await asyncio.sleep(wait)
-    else:
-        raise SystemExit("Could not reach Telegram after retries.")
+            
+            
+        
+            
+            
+        
+            
+            
+            
+            
+            
+    
+        
     # post_init only runs automatically inside run_polling/run_webhook; this manual lifecycle must call it.
     if app.post_init:
         try:
