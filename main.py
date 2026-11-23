@@ -98,7 +98,7 @@ async def run() -> None:
         await web.TCPSite(runner, "0.0.0.0", port).start()
         log.info("HTTP server on :%s (/health, /app, /api%s)", port, ", " + WEBHOOK_PATH if webhook else "")
     
-            attempt = 0
+    attempt = 0
     while True:
         attempt += 1
         try:
