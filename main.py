@@ -97,7 +97,21 @@ async def run() -> None:
         await runner.setup()
         await web.TCPSite(runner, "0.0.0.0", port).start()
         log.info("HTTP server on :%s (/health, /app, /api%s)", port, ", " + WEBHOOK_PATH if webhook else "")
-    
+        # Temporary Telegram connectivity test
+    import httpx
+    try:
+        async with httpx.AsyncClient(timeout=15) as client:
+            response = await client.get(
+                f"https://api.telegram.org/bot{config.TELEGRAM_BOT_TOKEN}/getMe"
+            )
+        result = response.json()
+        log.info(
+            "Telegram connection test: HTTP %s; ok=%s",
+            response.status_code,
+            result.get("ok")
+        )
+    except Exception as e:
+        log.warning("Telegram connection test failed: %s", type(e).__name__)
     attempt = 0
     while True:
         attempt += 1
