@@ -97,7 +97,7 @@ async def run() -> None:
         await runner.setup()
         await web.TCPSite(runner, "0.0.0.0", port).start()
         log.info("HTTP server on :%s (/health, /app, /api%s)", port, ", " + WEBHOOK_PATH if webhook else "")
-        # Temporary Telegram connectivity test
+    # Temporary Telegram connectivity test
     import httpx
     try:
         async with httpx.AsyncClient(timeout=15) as client:
